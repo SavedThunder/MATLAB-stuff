@@ -1,0 +1,15 @@
+clear;clc;
+load Weather
+
+count = 0;
+YearVector = 1970:1:2015;
+for year = YearVector
+    count = count + 1;
+    DaysAbove90(count) = sum(W.YEAR == year & W.TMAX > 90);
+end
+STD = std(DaysAbove90);
+MEAN = mean(DaysAbove90);
+plot([1970 2015], [MEAN MEAN],'k','LineWidth',3); hold on
+plot(YearVector,DaysAbove90,'ro-'); hold on
+xlabel('Year')
+ylabel('Days Above 90')

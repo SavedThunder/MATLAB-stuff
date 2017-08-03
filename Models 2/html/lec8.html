@@ -1,0 +1,360 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>lec8</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-03-01"><meta name="DC.source" content="lec8.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">set up problem</a></li><li><a href="#3">numerical differentiation</a></li><li><a href="#4">numerical integration</a></li></ul></div><pre class="codeinput"><span class="comment">% Robert W. Rost</span>
+<span class="comment">%</span>
+<span class="comment">% February 29, 2016</span>
+<span class="comment">%</span>
+<span class="comment">% numerical techniques</span>
+<span class="comment">%</span>
+</pre><h2>set up problem<a name="2"></a></h2><pre class="codeinput">clc
+clear
+close <span class="string">all</span>
+g=9.81;v0=70;th=45*pi/180;
+thit=roots([-.5*g v0*sin(th) 0]);
+t=linspace(0,thit(2),20);
+y=-.5*g*t.^2+v0*sin(th)*t+0;
+x=v0*cos(th)*t+0;
+figure(1)
+subplot(2,1,1)
+plot(t,y,<span class="string">'k+'</span>,t,x,<span class="string">'ko'</span>)
+xlabel(<span class="string">'time (sec)'</span>);ylabel(<span class="string">'height (feet)'</span>)
+legend(<span class="string">'height'</span>,<span class="string">'range'</span>,<span class="string">'location'</span>,<span class="string">'best'</span>)
+axis([0 thit(2) 0 max(x)])
+subplot(2,1,2)
+plot(x,y,<span class="string">'kd'</span>)
+xlabel(<span class="string">'range (feet)'</span>);ylabel(<span class="string">'height (feet)'</span>)
+axis([0 max(x) 0 max(y)])
+</pre><h2>numerical differentiation<a name="3"></a></h2><pre class="codeinput">fprintf(<span class="string">'numerically find the velocity in x and y directions\n'</span>)
+fprintf(<span class="string">'and end up with as many values of v as in x and y\n'</span>)
+pause
+fprintf(<span class="string">'use the forward difference for first two points\n'</span>)
+pause
+dt=diff(t);
+vy=zeros(1,length(t));
+vx=zeros(1,length(t));
+<span class="comment">% first point</span>
+vy(1)= (y(2) - y(1))/(t(2));
+vx(1)= (x(2) - x(1))/(t(2));
+<span class="comment">% middle points</span>
+fprintf(<span class="string">'use the 3 point for the points from 2 to end-1\n'</span>)
+pause
+<span class="keyword">for</span> c=2:length(t)-1
+    vy(c)= (y(c+1) - y(c-1))/(t(c+1) - t(c-1));
+    vx(c)= (x(c+1) - x(c-1))/(t(c+1) - t(c-1));
+<span class="keyword">end</span>
+<span class="comment">% last point</span>
+fprintf(<span class="string">'use the backward difference for the last two points\n'</span>)
+pause
+vy(length(t))= (y(length(t)) - y(length(t-1)))/(t(end)-t(end-1));
+vx(length(t))= (x(length(t)) - x(length(t-1)))/(t(end)-t(end-1));
+<span class="comment">% analytical</span>
+fprintf(<span class="string">'compute analytical velocities\n'</span>)
+pause
+vya=-.5*2*9.81*t+70*sin(th);
+vxa(1:length(t))=70*cos(th);
+fprintf(<span class="string">'plot\n'</span>)
+pause
+figure(2)
+subplot(2,1,1)
+plot(t,y,<span class="string">'k'</span>,t,vy,<span class="string">'g+'</span>,t,vya,<span class="string">'r'</span>)
+xlabel(<span class="string">'time (sec)'</span>);ylabel(<span class="string">'height (ft) and velocity (ft/sec)'</span>)
+legend(<span class="string">'height'</span>,<span class="string">'numerical velocity'</span>,<span class="string">'analytical velocity'</span>)
+subplot(2,1,2)
+plot(t,x,<span class="string">'k'</span>,t,vx,<span class="string">'g+'</span>,t,vxa,<span class="string">'r'</span>)
+xlabel(<span class="string">'time (sec)'</span>);ylabel(<span class="string">'range (ft) and velocity (ft/sec)'</span>)
+legend(<span class="string">'range'</span>,<span class="string">'numerical velocity'</span>,<span class="string">'analytical velocity'</span>)
+pause
+</pre><h2>numerical integration<a name="4"></a></h2><pre class="codeinput">fprintf(<span class="string">'find the integral from x=0 to x=289.1786 (x(12))\n'</span>)
+dx=diff(x);
+<span class="comment">% left rieman sum</span>
+lrs=0;
+<span class="keyword">for</span> c=1:length(x)/2
+    lrs = lrs + (y(c)*dx(c));
+<span class="keyword">end</span>
+<span class="keyword">for</span> c = 2:11
+    rrs = rrs + (y(c) *dx(c));
+<span class="keyword">end</span>
+<span class="comment">% for c = 1:10</span>
+<span class="comment">%     trap = trap + ((y(c+1)-y(c))*dx(c))</span>
+<span class="comment">% end</span>
+figure(3)
+<span class="keyword">for</span> c=1:length(x)/2
+    plot([x(c) x(c)],[0 y(c)])
+    hold <span class="string">on</span>
+    plot([x(c) x(c+1)],[y(c) y(c)])
+    plot([x(c+1) x(c+1)],[0 y(c)])
+<span class="keyword">end</span>
+plot(x,y,<span class="string">'ko'</span>)
+xlabel(<span class="string">'range (ft)'</span>);ylabel(<span class="string">'height (ft)'</span>);title(<span class="string">'left Reiman sum'</span>)
+<span class="comment">% right reiman sum</span>
+rrs=0;
+<span class="comment">%for c=% add code</span>
+<span class="comment">%    rrs=% add code</span>
+<span class="comment">%end</span>
+figure (4)
+<span class="keyword">for</span> c=2:length(x)/2+1
+    plot([x(c) x(c)],[0 y(c)])
+    hold <span class="string">on</span>
+    plot([x(c) x(c-1)],[y(c) y(c)])
+    plot([x(c-1) x(c-1)],[0 y(c)])
+<span class="keyword">end</span>
+plot(x,y,<span class="string">'ko'</span>)
+xlabel(<span class="string">'range (ft)'</span>);ylabel(<span class="string">'height (ft)'</span>);title(<span class="string">'rigth Reiman sum'</span>)
+<span class="comment">% trap</span>
+trap=0;
+<span class="comment">%for c=% add code</span>
+<span class="comment">%    trap=% add code</span>
+<span class="comment">%end</span>
+figure (5)
+<span class="keyword">for</span> c=1:length(x)/2
+    plot([x(c) x(c)],[0 y(c)])
+    hold <span class="string">on</span>
+    plot([x(c) x(c+1)],[y(c) y(c+1)])
+    plot([x(c+1) x(c+1)],[0 y(c+1)])
+<span class="keyword">end</span>
+plot(x,y,<span class="string">'ko'</span>)
+xlabel(<span class="string">'range (ft)'</span>);ylabel(<span class="string">'height (ft)'</span>);title(<span class="string">'trapeziodal rule'</span>)
+<span class="comment">%</span>
+<span class="comment">% Simpsons Rule</span>
+<span class="comment">%</span>
+mysimp=0;
+<span class="keyword">for</span> c=1:2:length(x)/2
+mysimp=mysimp+((y(c)+(4*y(c+1))+y(c+2))*(x(c+2)-x(c))/6);
+<span class="keyword">end</span>
+figure (6)
+<span class="keyword">for</span> c=1:2:length(x)/2
+    plot([x(c) x(c)],[0 y(c)])
+    hold <span class="string">on</span>
+    plot([x(c) x(c+2)],[y(c) y(c+2)])
+    plot([x(c+2) x(c+2)],[0 y(c+2)])
+<span class="keyword">end</span>
+plot(x,y,<span class="string">'ko'</span>)
+xlabel(<span class="string">'range (ft)'</span>);ylabel(<span class="string">'height (ft)'</span>);title(<span class="string">'Simpson''s rule'</span>)
+ta=thit(2);
+<span class="comment">%xa=x(length(x)/2+2);</span>
+xa=x(11);
+ia=-(.5*9.81*ta^3)/3+(70*sin(3*pi/4)*ta^2)/2;
+iyx=tan(th)*(xa^2/2)-(g/(2*v0^2*(cos(th))^2))*(xa^3/3);
+fprintf(<span class="string">'analytical = %0.5f\n'</span>,iyx)
+fprintf(<span class="string">'left rieman sum = %0.5f\n'</span>,lrs)
+fprintf(<span class="string">'right rieman sum = %0.5f\n'</span>,rrs)
+fprintf(<span class="string">'trapezodial = %0.5f\n'</span>,trap)
+fprintf(<span class="string">'simpson = %0.5f\n'</span>,mysimp)
+</pre><pre class="codeoutput">find the integral from x=0 to x=289.1786 (x(12))
+</pre><pre class="codeoutput error">Undefined function or variable 'rrs'.
+
+Error in lec8 (line 76)
+    rrs = rrs + (y(c) *dx(c));
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Robert W. Rost
+%
+% February 29, 2016
+%
+% numerical techniques
+%
+%% set up problem
+clc
+clear
+close all
+g=9.81;v0=70;th=45*pi/180;
+thit=roots([-.5*g v0*sin(th) 0]);
+t=linspace(0,thit(2),20);
+y=-.5*g*t.^2+v0*sin(th)*t+0;
+x=v0*cos(th)*t+0;
+figure(1)
+subplot(2,1,1)
+plot(t,y,'k+',t,x,'ko')
+xlabel('time (sec)');ylabel('height (feet)')
+legend('height','range','location','best')
+axis([0 thit(2) 0 max(x)])
+subplot(2,1,2)
+plot(x,y,'kd')
+xlabel('range (feet)');ylabel('height (feet)')
+axis([0 max(x) 0 max(y)])
+%%  numerical differentiation
+fprintf('numerically find the velocity in x and y directions\n')
+fprintf('and end up with as many values of v as in x and y\n')
+pause
+fprintf('use the forward difference for first two points\n')
+pause
+dt=diff(t);
+vy=zeros(1,length(t));
+vx=zeros(1,length(t));
+% first point
+vy(1)= (y(2) - y(1))/(t(2)); 
+vx(1)= (x(2) - x(1))/(t(2));
+% middle points
+fprintf('use the 3 point for the points from 2 to end-1\n')
+pause
+for c=2:length(t)-1
+    vy(c)= (y(c+1) - y(c-1))/(t(c+1) - t(c-1));
+    vx(c)= (x(c+1) - x(c-1))/(t(c+1) - t(c-1));
+end
+% last point
+fprintf('use the backward difference for the last two points\n')
+pause
+vy(length(t))= (y(length(t)) - y(length(t-1)))/(t(end)-t(end-1));
+vx(length(t))= (x(length(t)) - x(length(t-1)))/(t(end)-t(end-1));
+% analytical
+fprintf('compute analytical velocities\n')
+pause
+vya=-.5*2*9.81*t+70*sin(th);
+vxa(1:length(t))=70*cos(th);
+fprintf('plot\n')
+pause
+figure(2)
+subplot(2,1,1)
+plot(t,y,'k',t,vy,'g+',t,vya,'r')
+xlabel('time (sec)');ylabel('height (ft) and velocity (ft/sec)')
+legend('height','numerical velocity','analytical velocity')
+subplot(2,1,2)
+plot(t,x,'k',t,vx,'g+',t,vxa,'r')
+xlabel('time (sec)');ylabel('range (ft) and velocity (ft/sec)')
+legend('range','numerical velocity','analytical velocity')
+pause
+%% numerical integration
+fprintf('find the integral from x=0 to x=289.1786 (x(12))\n')
+dx=diff(x);
+% left rieman sum
+lrs=0;
+for c=1:length(x)/2
+    lrs = lrs + (y(c)*dx(c));
+end
+for c = 2:11
+    rrs = rrs + (y(c) *dx(c));
+end
+% for c = 1:10
+%     trap = trap + ((y(c+1)-y(c))*dx(c))
+% end
+figure(3)
+for c=1:length(x)/2
+    plot([x(c) x(c)],[0 y(c)])
+    hold on
+    plot([x(c) x(c+1)],[y(c) y(c)])
+    plot([x(c+1) x(c+1)],[0 y(c)])
+end
+plot(x,y,'ko')
+xlabel('range (ft)');ylabel('height (ft)');title('left Reiman sum')
+% right reiman sum
+rrs=0;
+%for c=% add code
+%    rrs=% add code
+%end
+figure (4)
+for c=2:length(x)/2+1
+    plot([x(c) x(c)],[0 y(c)])
+    hold on
+    plot([x(c) x(c-1)],[y(c) y(c)])
+    plot([x(c-1) x(c-1)],[0 y(c)])
+end
+plot(x,y,'ko')
+xlabel('range (ft)');ylabel('height (ft)');title('rigth Reiman sum')
+% trap
+trap=0;
+%for c=% add code
+%    trap=% add code
+%end
+figure (5)
+for c=1:length(x)/2
+    plot([x(c) x(c)],[0 y(c)])
+    hold on
+    plot([x(c) x(c+1)],[y(c) y(c+1)])
+    plot([x(c+1) x(c+1)],[0 y(c+1)])
+end
+plot(x,y,'ko')
+xlabel('range (ft)');ylabel('height (ft)');title('trapeziodal rule')
+%
+% Simpsons Rule
+%
+mysimp=0;
+for c=1:2:length(x)/2
+mysimp=mysimp+((y(c)+(4*y(c+1))+y(c+2))*(x(c+2)-x(c))/6);
+end
+figure (6)
+for c=1:2:length(x)/2
+    plot([x(c) x(c)],[0 y(c)])
+    hold on
+    plot([x(c) x(c+2)],[y(c) y(c+2)])
+    plot([x(c+2) x(c+2)],[0 y(c+2)])
+end
+plot(x,y,'ko')
+xlabel('range (ft)');ylabel('height (ft)');title('Simpson''s rule')
+ta=thit(2);
+%xa=x(length(x)/2+2);
+xa=x(11);
+ia=-(.5*9.81*ta^3)/3+(70*sin(3*pi/4)*ta^2)/2;
+iyx=tan(th)*(xa^2/2)-(g/(2*v0^2*(cos(th))^2))*(xa^3/3);
+fprintf('analytical = %0.5f\n',iyx)
+fprintf('left rieman sum = %0.5f\n',lrs)
+fprintf('right rieman sum = %0.5f\n',rrs)
+fprintf('trapezodial = %0.5f\n',trap)
+fprintf('simpson = %0.5f\n',mysimp)
+##### SOURCE END #####
+--></body></html>

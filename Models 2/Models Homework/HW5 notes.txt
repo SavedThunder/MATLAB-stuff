@@ -1,0 +1,28 @@
+Problem 2:
+One cannot move up and down or rotate
+One can't move down but it can rotate
+s = w/2zl equation = for stress
+x = 25
+L = 40
+min stress = -84375
+
+Problem 3:
+Same beam only deflection
+symbolic equation for deflection
+diff
+find critical points - One is on the beam the other is off the beam
+23.1836
+51.8614
+plot so that it is positive porabola
+
+Problem 4:
+Monthly/Yearly 
+Find the rate as you put in
+find diff of some function
+
+Int = integration
+int02pi = int(vel,'Theta',0,2*pi)
+int0pi = int(vel,'Theta',0,pi)
+Integral = int(x,y,bound1,bound2)
+
+deltaT/3(f(1) + 4f(1.5) + 2f(2) + 4f(2.5) + 2f(3))
